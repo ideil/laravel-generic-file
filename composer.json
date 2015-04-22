@@ -21,6 +21,5 @@
         "psr-4": {
             "Ideil\\LaravelGenericFile\\": "src/"
         }
-    },
-    "minimum-stability": "stable"
+    }
 }
