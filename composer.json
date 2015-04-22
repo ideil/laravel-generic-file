@@ -1,0 +1,26 @@
+{
+    "name": "ideil/laravel-generic-file",
+    "description": "Easy uploaded files store management for the Laravel.",
+    "keywords": ["laravel", "eloquent", "file", "upload"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sergiy Litvinchuk",
+            "email": "s.litvinchuk@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "laravel/framework": "5.*",
+        "laravel/generic-file": "0.*"
+    },
+    "autoload": {
+        "classmap": [
+            "src/migrations"
+        ],
+        "psr-4": {
+            "Ideil\\LaravelGenericFile\\": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
