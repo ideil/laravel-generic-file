@@ -45,7 +45,7 @@ class GenericFile extends BaseGenericFile
 	 *
 	 * @return Illuminate\Database\Eloquent\Model|string|null
 	 */
-	public function storeUploadedFile(UploadedFile $file, $path_pattern = null, $existing_model = null)
+	public function moveUploadedFile(UploadedFile $file, $path_pattern = null, $existing_model = null)
 	{
 		// get model instance if available
 		// not use models if $existing_model === false
@@ -62,7 +62,7 @@ class GenericFile extends BaseGenericFile
 				return null;
 		}
 
-		$interpolated = $this->store($file, $path_pattern);
+		$interpolated = parent::moveUploadedFile($file, $path_pattern);
 
 		// check is model available
 		// and update it
@@ -83,11 +83,10 @@ class GenericFile extends BaseGenericFile
 	 *
 	 * @return string
 	 */
-	public function urlModel($model, $path_pattern = null)
+	public function makeUrlToUploadedFile($model, $path_pattern = null, array $model_map = array())
 	{
-		$model_map = $model instanceof Model ? $model->getFileAssignMap() : [];
-
-		return $this->url($model, $path_pattern, $model_map);
+		return parent::makeUrlToUploadedFile($model, $path_pattern,
+			$model instanceof Model ? $model->getFileAssignMap() : $model_map);
 	}
 
 	/**
@@ -98,11 +97,10 @@ class GenericFile extends BaseGenericFile
 	 *
 	 * @return string
 	 */
-	public function pathModel($model, $path_pattern = null)
+	public function makePathToUploadedFile($model, $path_pattern = null, array $model_map = array())
 	{
-		$model_map = $model instanceof Model ? $model->getFileAssignMap() : [];
-
-		return $this->path($model, $path_pattern, $model_map);
+		return parent::makePathToUploadedFile($model, $path_pattern,
+			$model instanceof Model ? $model->getFileAssignMap() : $model_map);
 	}
 
 }

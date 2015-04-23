@@ -5,6 +5,19 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 trait EloquentTrait
 {
 	/**
+	 * @var Ideil\LaravelGenericFile\GenericFile
+	 */
+	protected static $generic_file;
+
+	/**
+	 * @return null
+	 */
+	public static function bootEloquentTrait()
+	{
+		self::$generic_file = app('generic-file');
+	}
+
+	/**
 	 * Store uploaded file by configured path pattern and fill data to this model
 	 *
 	 * @param  Symfony\Component\HttpFoundation\File\UploadedFile $file
@@ -12,7 +25,7 @@ trait EloquentTrait
 	 */
 	public function upload(UploadedFile $file)
 	{
-		app('generic-file')->storeUploadedFile($file, null, $this);
+		self::$generic_file->moveUploadedFile($file, null, $this);
 
 		return $this;
 	}
@@ -24,7 +37,7 @@ trait EloquentTrait
 	 */
 	public function url()
 	{
-		return app('generic-file')->urlModel($this);
+		return self::$generic_file->makeUrlToUploadedFile($this);
 	}
 
 	/**
@@ -34,7 +47,7 @@ trait EloquentTrait
 	 */
 	public function path()
 	{
-		return app('generic-file')->pathModel($this);
+		return self::$generic_file->makePathToUploadedFile($this);
 	}
 
 	/**
@@ -44,7 +57,7 @@ trait EloquentTrait
 	 */
 	public function delete()
 	{
-		if (app('generic-file')->canRemoveFiles())
+		if (self::$generic_file->canRemoveFiles())
 		{
 			$file_usage_count = 0;
 
@@ -55,7 +68,7 @@ trait EloquentTrait
 
 			if ($file_usage_count <= 1)
 			{
-				app('generic-file')->delete($this);
+				self::$generic_file->delete($this);
 			}
 		}
 
