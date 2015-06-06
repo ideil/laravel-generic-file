@@ -1,0 +1,84 @@
+<?php
+
+require __DIR__.'/../vendor/autoload.php';
+
+/*
+|--------------------------------------------------------------------------
+| Create static files miner
+|--------------------------------------------------------------------------
+|
+| Handles requests to nonexistent static files,
+| analyzes and modifies the URL file before he was sent to http response,
+| and stores the processed file and next time have
+| to give the finished file is not causing this script
+|
+*/
+
+
+$miner = new Ideil\LaravelGenericFile\GenericFileMiner(
+	Symfony\Component\HttpFoundation\Request::createFromGlobals(), '~/[a-z\d]{2}/[a-z\d]{2}/.+$~');
+
+/*
+|--------------------------------------------------------------------------
+| Configure
+|--------------------------------------------------------------------------
+|
+| Setup basic settings
+|
+*/
+
+$miner->setUriRoot('/content/thumbs/{checksum}/');
+
+$miner->setHandledFilesRoot(__DIR__ . '/../../static');
+
+$miner->setOriginalFilesRoot(__DIR__ . '/../../static/content/files');
+
+/*
+|--------------------------------------------------------------------------
+| Register thumb handlers
+|--------------------------------------------------------------------------
+|
+| Register handlers for processing files
+|
+*/
+
+// Crop processing
+// Example: URL must contain a fragment /0x0-100x100/
+
+$miner->addThumbHandler('crop', '~/(\d+)x(\d+)-(\d+)x(\d+)/~', function ($image, $matches)
+{
+	$image->crop($matches[3], $matches[4], $matches[1], $matches[2]);
+});
+
+// Resize processing
+// Example: URL must contain a fragment /100x100/
+
+$miner->addThumbHandler('resize', '~/(\d*)([x\-])(\d*)/~', function ($image, $matches)
+{
+	if ($matches[2] === 'x')
+	{
+		$image->resize($matches[1], $matches[3], function ($constraint) {
+			$constraint->aspectRatio();
+			// $constraint->upsize();
+		});
+	}
+});
+
+// Watermark processing
+// Example: URL must contain a fragment /watermark/
+
+$miner->addThumbHandler('watermark', '~/watermark/~', function ($image, $matches)
+{
+	$image->insert(__DIR__ . '/../static/control/img/logo-gray.png', 'bottom-right', 10, 10);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Run
+|--------------------------------------------------------------------------
+|
+| Execute all handlers and send response
+|
+*/
+
+$miner->handle()->send();
