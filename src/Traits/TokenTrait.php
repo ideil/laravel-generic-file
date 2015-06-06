@@ -10,7 +10,7 @@ trait TokenTrait {
 	 * @param  string $str
 	 * @return string
 	 */
-	public function tokenFormStr($str)
+	public function tokenFromStr($str)
 	{
 		return $this->str(env('APP_KEY') . $str, false);
 	}
@@ -21,9 +21,9 @@ trait TokenTrait {
 	 * @param  string $str
 	 * @return string
 	 */
-	public function token6FormStr($str)
+	public function token6FromStr($str)
 	{
-		return substr($this->tokenFormStr($str), 0, 6);
+		return substr($this->tokenFromStr($str), 0, 6);
 	}
 
 }

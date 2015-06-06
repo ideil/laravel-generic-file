@@ -91,7 +91,7 @@ class GenericFileMiner {
 
 				$hashable_uri = substr($this->getCleanUri(), strlen($uri_root));
 
-				if ($this->getRequestChecksum() !== $this->token6FormStr($hashable_uri))
+				if ($this->getRequestChecksum() !== $this->token6FromStr($hashable_uri))
 				{
 					throw new InvalidArgumentException('Invalid checksum value');
 				}
