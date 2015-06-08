@@ -83,10 +83,10 @@ class GenericFile extends BaseGenericFile
 	 *
 	 * @return string
 	 */
-	public function makeUrlToUploadedFile($model, $path_pattern = null, array $model_map = array())
+	public function makeUrlToUploadedFile($model, $path_pattern = null, array $model_map = array(), $domain = null)
 	{
 		return parent::makeUrlToUploadedFile($model, $path_pattern,
-			$model instanceof Model ? $model->getFileAssignMap() : $model_map);
+			$model instanceof Model ? $model->getFileAssignMap() : $model_map, $domain);
 	}
 
 	/**
