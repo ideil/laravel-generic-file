@@ -106,6 +106,11 @@ class GenericFileMiner {
 					$this->getRequestChecksum(), $this->uri_root), '/');
 
 				// with trailling left slash
+				
+				if (strpos($this->getCleanUri(), $uri_root) !== 0)
+				{
+					throw new InvalidArgumentException('Wrong uri root');
+				}
 
 				$hashable_uri = substr($this->getCleanUri(), strlen($uri_root));
 
