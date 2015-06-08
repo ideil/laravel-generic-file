@@ -55,6 +55,19 @@ class GenericFileMiner {
 	 * @var string
 	 */
 	protected $path_regexp;
+	
+	/**
+	 * @var boolean
+	 */
+	protected $is_debug = false;
+
+	/**
+	 * @param boolean $is_active
+	 */
+	public function setDevModeActivity($is_active)
+	{
+		$this->is_debug = $is_active;
+	}
 
 	/**
 	 * @param string   $name
@@ -72,6 +85,11 @@ class GenericFileMiner {
 	 */
 	public function invalidArgumentResponse($e)
 	{
+		if ($this->is_debug)
+		{
+			throw $e;
+		}
+		
 		return new Response('404 Not found', Response::HTTP_NOT_FOUND);
 	}
 
