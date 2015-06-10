@@ -82,20 +82,6 @@ class GenericFileMiner {
 	}
 
 	/**
-	 * @param  InvalidArgumentException $e
-	 * @return void
-	 */
-	public function invalidArgumentResponse($e)
-	{
-		if ($this->is_debug)
-		{
-			return (new SymfonyDisplayer($this->is_debug))->createResponse($e);
-		}
-
-		return new Response('404 Not found', Response::HTTP_NOT_FOUND);
-	}
-
-	/**
 	 * @return void
 	 */
 	public function handle()
@@ -154,7 +140,12 @@ class GenericFileMiner {
 		}
 		catch (Exception $e)
 		{
-			return $this->invalidArgumentResponse($e);
+			if ($this->is_debug)
+			{
+				return (new SymfonyDisplayer($this->is_debug))->createResponse($e);
+			}
+	
+			return new Response('404 Not found', Response::HTTP_NOT_FOUND);
 		}
 	}
 
