@@ -2,10 +2,12 @@
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Debug\ExceptionHandler as SymfonyDisplayer;
 
 use Intervention\Image\ImageManagerStatic as Image;
 
 use InvalidArgumentException;
+use Exception;
 
 class GenericFileMiner {
 
@@ -55,7 +57,7 @@ class GenericFileMiner {
 	 * @var string
 	 */
 	protected $path_regexp;
-	
+
 	/**
 	 * @var boolean
 	 */
@@ -87,9 +89,9 @@ class GenericFileMiner {
 	{
 		if ($this->is_debug)
 		{
-			throw $e;
+			return (new SymfonyDisplayer($this->is_debug))->createResponse($e);
 		}
-		
+
 		return new Response('404 Not found', Response::HTTP_NOT_FOUND);
 	}
 
@@ -106,7 +108,7 @@ class GenericFileMiner {
 					$this->getRequestChecksum(), $this->uri_root), '/');
 
 				// with trailling left slash
-				
+
 				if (strpos($this->getCleanUri(), $uri_root) !== 0)
 				{
 					throw new InvalidArgumentException('Wrong uri root');
@@ -150,7 +152,7 @@ class GenericFileMiner {
 			return $response->prepare($this->request);
 
 		}
-		catch (InvalidArgumentException $e)
+		catch (Exception $e)
 		{
 			return $this->invalidArgumentResponse($e);
 		}
