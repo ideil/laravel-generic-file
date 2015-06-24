@@ -1,6 +1,8 @@
 <?php namespace Ideil\LaravelGenericFile\Traits;
 
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Ideil\GenericFile\Resources\File;
+use Input;
 
 trait EloquentTrait
 {
@@ -25,7 +27,7 @@ trait EloquentTrait
 	 */
 	public function upload(UploadedFile $file)
 	{
-		self::$generic_file->moveUploadedFile($file, null, $this);
+		self::$generic_file->moveUploadedFile(new File($file, $file->getClientOriginalName()), null, $this);
 
 		return $this;
 	}
@@ -88,11 +90,58 @@ trait EloquentTrait
 	}
 
 	/**
+	 * @param  string $url
+	 * @return Model
+	 */
+	public static function createFromUrl($url)
+	{
+		$instance = new static;
+
+		if (self::$generic_file->fetchUrl($url, null, $instance))
+		{
+			return $instance;
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param  string $name
+	 * @return Model
+	 */
+	public static function createFromInput($name)
+	{
+		$file = Input::file($name);
+
+		if ($file instanceof UploadedFile)
+		{
+			return self::createFromUploadedFile($file);
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param  string $name
+	 * @return Model
+	 */
+	public static function createFromUploadedFile(UploadedFile $file)
+	{
+		$instance = new static;
+
+		self::$generic_file->moveUploadedFile(new File($file, $file->getClientOriginalName()), null, $this);
+
+		self::$generic_file->fetchUrl($url, null, $instance);
+
+		return $instance;
+	}
+
+	/**
 	 * Before upload event, cancel file store if false returned
 	 *
 	 * @return boolean
 	 */
-	public function beforeUpload(UploadedFile $file)
+	public function beforeUpload(File $file)
 	{
 		return true;
 	}

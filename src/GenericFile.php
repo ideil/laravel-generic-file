@@ -1,9 +1,7 @@
 <?php namespace Ideil\LaravelGenericFile;
 
 use Illuminate\Database\Eloquent\Model;
-
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-
+use Ideil\GenericFile\Resources\File;
 use Ideil\GenericFile\GenericFile as BaseGenericFile;
 
 class GenericFile extends BaseGenericFile
@@ -39,13 +37,13 @@ class GenericFile extends BaseGenericFile
 	/**
 	 * Move uploaded file to path by pattern and update model
 	 *
-	 * @param Symfony\Component\HttpFoundation\File\UploadedFile $file
+	 * @param File $file
 	 * @param string|null $path_pattern
 	 * @param Illuminate\Database\Eloquent\Model|null|false $existing_model
 	 *
 	 * @return Illuminate\Database\Eloquent\Model|string|null
 	 */
-	public function moveUploadedFile(UploadedFile $file, $path_pattern = null, $existing_model = null)
+	public function moveUploadedFile(File $file, $path_pattern = null, $existing_model = null)
 	{
 		// get model instance if available
 		// not use models if $existing_model === false
@@ -73,6 +71,23 @@ class GenericFile extends BaseGenericFile
 		}
 
 		return $interpolated;
+	}
+
+	/**
+	 * @param  string $url
+	 * @param  string $path_pattern
+	 * @param Illuminate\Database\Eloquent\Model|null|false $existing_model
+	 *
+	 * @return string|null
+	 */
+	public function fetchUrl($url, $path_pattern = null, $existing_model = null)
+	{
+		if ($file = $this->fetchFileByUrl($url))
+		{
+			return $this->moveUploadedFile($file, $path_pattern, $existing_model);
+		}
+
+		return null;
 	}
 
 	/**
