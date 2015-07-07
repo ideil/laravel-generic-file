@@ -12,7 +12,7 @@ trait TokenTrait {
 	 */
 	public function tokenFromStr($str)
 	{
-		return $this->str(env('APP_KEY') . $str, false);
+		return substr($this->str(env('APP_KEY') . $str), 0, 32);
 	}
 
 	/**
