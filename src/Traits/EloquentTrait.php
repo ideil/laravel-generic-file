@@ -27,7 +27,8 @@ trait EloquentTrait
 	 */
 	public function upload(UploadedFile $file)
 	{
-		self::$generic_file->moveUploadedFile(new File($file, $file->getClientOriginalName()), null, $this);
+		self::$generic_file->moveUploadedFile(new File($file,
+			$file->getClientOriginalName()), null, $this);
 
 		return $this;
 	}
@@ -111,27 +112,24 @@ trait EloquentTrait
 	 */
 	public static function createFromInput($name)
 	{
-		$file = Input::file($name);
-
-		if ($file instanceof UploadedFile)
-		{
-			return self::createFromUploadedFile($file);
-		}
-
-		return null;
+		return self::createFromUploadedFile(Input::file($name));
 	}
 
 	/**
 	 * @param  string $name
 	 * @return Model
 	 */
-	public static function createFromUploadedFile(UploadedFile $file)
+	public static function createFromUploadedFile(UploadedFile $file = null)
 	{
+		if ( ! $file instanceof UploadedFile)
+		{
+			return null;
+		}
+
 		$instance = new static;
 
-		self::$generic_file->moveUploadedFile(new File($file, $file->getClientOriginalName()), null, $this);
-
-		self::$generic_file->fetchUrl($url, null, $instance);
+		self::$generic_file->moveUploadedFile(new File($file,
+			$file->getClientOriginalName()), null, $instance);
 
 		return $instance;
 	}
