@@ -70,6 +70,32 @@ class GenericFileMiner {
 	{
 		$this->is_debug = $is_active;
 	}
+	
+	/**
+	 * @param  string   $pattern
+	 * @param  Callable $handler
+	 * @return mixed
+	 */
+	public function uriMatch($pattern, Callable $handler)
+	{
+		if (preg_match($pattern, $this->getCleanUri(), $matches))
+		{
+			return $handler($this->getCleanUri(), $matches);
+		}
+	}
+
+	/**
+	 * @param  string   $pattern
+	 * @param  Callable $handler
+	 * @return mixed
+	 */
+	public function uriNotMatch($pattern, Callable $handler)
+	{
+		if ( ! preg_match($pattern, $this->getCleanUri(), $matches))
+		{
+			return $handler($this->getCleanUri(), $matches);
+		}
+	}
 
 	/**
 	 * @param string   $name
