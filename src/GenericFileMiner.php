@@ -2,6 +2,7 @@
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Debug\ExceptionHandler as SymfonyDisplayer;
 
 use Intervention\Image\ImageManagerStatic as Image;
@@ -69,6 +70,15 @@ class GenericFileMiner {
 	public function setDevModeActivity($is_active)
 	{
 		$this->is_debug = $is_active;
+	}
+	
+	/**
+	 * @param string $url
+	 * @return  Symfony\Component\HttpFoundation\RedirectResponse
+	 */
+	public function getRedirectTo($url)
+	{
+		return new RedirectResponse($url);
 	}
 	
 	/**
