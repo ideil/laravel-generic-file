@@ -14,7 +14,7 @@
         "laravel/framework": "5.*",
         "symfony/http-foundation": "2.*",
         "intervention/image": "2.2.*",
-        "ideil/generic-file": "dev-master"
+        "ideil/generic-file": "@dev"
     },
     "autoload": {
         "classmap": [
