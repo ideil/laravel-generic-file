@@ -14,7 +14,7 @@
         "laravel/framework": "5.*",
         "symfony/http-foundation": "2.*",
         "intervention/image": "2.2.*",
-        "ideil/generic-file": "@dev"
+        "ideil/generic-file": "dev-master"
     },
     "autoload": {
         "classmap": [
@@ -23,6 +23,5 @@
         "psr-4": {
             "Ideil\\LaravelGenericFile\\": "src/"
         }
-    },
-    "minimum-stability": "stable"
+    }
 }
