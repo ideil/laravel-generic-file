@@ -10,294 +10,276 @@ use Intervention\Image\ImageManagerStatic as Image;
 use InvalidArgumentException;
 use Exception;
 
-class GenericFileMiner {
+class GenericFileMiner
+{
 
-	use Traits\TokenTrait;
+    use Traits\TokenTrait;
 
-	/**
-	 * @var string
-	 */
-	protected $request_checksum = null;
+    /**
+     * @var string
+     */
+    protected $request_checksum = null;
 
-	/**
-	 * @var string
-	 */
-	protected $request_file_path = null;
+    /**
+     * @var string
+     */
+    protected $request_file_path = null;
 
-	/**
-	 * @var string
-	 */
-	protected $clear_uri = null;
+    /**
+     * @var string
+     */
+    protected $clear_uri = null;
 
-	/**
-	 * @var array
-	 */
-	protected $thumb_handlers = [];
+    /**
+     * @var array
+     */
+    protected $thumb_handlers = [];
 
-	/**
-	 * @var Request
-	 */
-	protected $request = null;
+    /**
+     * @var Request
+     */
+    protected $request = null;
 
-	/**
-	 * @var string
-	 */
-	protected $uri_root = '';
+    /**
+     * @var string
+     */
+    protected $uri_root = '';
 
-	/**
-	 * @var string
-	 */
-	protected $handled_files_root = '';
+    /**
+     * @var string
+     */
+    protected $handled_files_root = '';
 
-	/**
-	 * @var string
-	 */
-	protected $original_files_root = '';
+    /**
+     * @var string
+     */
+    protected $original_files_root = '';
 
-	/**
-	 * @var string
-	 */
-	protected $path_regexp;
+    /**
+     * @var string
+     */
+    protected $path_regexp;
 
-	/**
-	 * @var boolean
-	 */
-	protected $is_debug = false;
+    /**
+     * @var boolean
+     */
+    protected $is_debug = false;
 
-	/**
-	 * @param boolean $is_active
-	 */
-	public function setDevModeActivity($is_active)
-	{
-		$this->is_debug = $is_active;
-	}
-	
-	/**
-	 * @param string $url
-	 * @return  Symfony\Component\HttpFoundation\RedirectResponse
-	 */
-	public function getRedirectTo($url)
-	{
-		return new RedirectResponse($url);
-	}
-	
-	/**
-	 * @param  string   $pattern
-	 * @param  Callable $handler
-	 * @return mixed
-	 */
-	public function uriMatch($pattern, Callable $handler)
-	{
-		if (preg_match($pattern, $this->getCleanUri(), $matches))
-		{
-			return $handler($this->getCleanUri(), $matches);
-		}
-	}
+    /**
+     * @param boolean $is_active
+     */
+    public function setDevModeActivity($is_active)
+    {
+        $this->is_debug = $is_active;
+    }
 
-	/**
-	 * @param  string   $pattern
-	 * @param  Callable $handler
-	 * @return mixed
-	 */
-	public function uriNotMatch($pattern, Callable $handler)
-	{
-		if ( ! preg_match($pattern, $this->getCleanUri(), $matches))
-		{
-			return $handler($this->getCleanUri(), $matches);
-		}
-	}
+    /**
+     * @param string $url
+     * @return  Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function getRedirectTo($url)
+    {
+        return new RedirectResponse($url);
+    }
 
-	/**
-	 * @param string   $name
-	 * @param string   $regexp
-	 * @param Callable $handler
-	 */
-	public function addThumbHandler($name, $regexp, Callable $handler)
-	{
-		$this->thumb_handlers[$name] = [$regexp, $handler];
-	}
+    /**
+     * @param  string   $pattern
+     * @param  Callable $handler
+     * @return mixed
+     */
+    public function uriMatch($pattern, callable $handler)
+    {
+        if (preg_match($pattern, $this->getCleanUri(), $matches)) {
+            return $handler($this->getCleanUri(), $matches);
+        }
+    }
 
-	/**
-	 * @return void
-	 */
-	public function handle()
-	{
-		try
-		{
-			if ($this->getRequestChecksum())
-			{
-				$uri_root     = rtrim(str_replace('{checksum}',
-					$this->getRequestChecksum(), $this->uri_root), '/');
+    /**
+     * @param  string   $pattern
+     * @param  Callable $handler
+     * @return mixed
+     */
+    public function uriNotMatch($pattern, callable $handler)
+    {
+        if (!preg_match($pattern, $this->getCleanUri(), $matches)) {
+            return $handler($this->getCleanUri(), $matches);
+        }
+    }
 
-				// with trailling left slash
+    /**
+     * @param string   $name
+     * @param string   $regexp
+     * @param Callable $handler
+     */
+    public function addThumbHandler($name, $regexp, callable $handler)
+    {
+        $this->thumb_handlers[$name] = [$regexp, $handler];
+    }
 
-				if (strpos($this->getCleanUri(), $uri_root) !== 0)
-				{
-					throw new InvalidArgumentException('Wrong uri root');
-				}
+    /**
+     * @return void
+     */
+    public function handle()
+    {
+        try
+        {
+            if ($this->getRequestChecksum()) {
+                $uri_root = rtrim(str_replace('{checksum}',
+                    $this->getRequestChecksum(), $this->uri_root), '/');
 
-				$hashable_uri = substr($this->getCleanUri(), strlen($uri_root));
+                // with trailling left slash
 
-				if ($this->getRequestChecksum() !== $this->token6FromStr($hashable_uri))
-				{
-					throw new InvalidArgumentException('Invalid checksum value');
-				}
-			}
+                if (strpos($this->getCleanUri(), $uri_root) !== 0) {
+                    throw new InvalidArgumentException('Wrong uri root');
+                }
 
-			if ( ! file_exists($real_file_path = rtrim($this->original_files_root, '/') . '/' . ltrim($this->getRequestFilePath(), '/')))
-			{
-				throw new InvalidArgumentException('File not exists ' . $real_file_path);
-			}
+                $uri_payload = substr($this->getCleanUri(), strlen($uri_root));
 
-			Image::configure(['driver' => 'imagick']);
+                if ($this->getRequestChecksum() !== $this->token6FromStr($uri_payload)) {
+                    throw new InvalidArgumentException('Invalid checksum value');
+                }
+            }
 
-			$image = Image::make($real_file_path);
+            if (!file_exists($real_file_path = rtrim($this->original_files_root, '/') . '/' . ltrim($this->getRequestFilePath(), '/'))) {
+                throw new InvalidArgumentException('File not exists ' . $real_file_path);
+            }
 
-			foreach ($this->thumb_handlers as $handler_name => $handler_data)
-			{
-				if (preg_match($handler_data[0], $this->getCleanUri(), $matches))
-				{
-					$handler_data[1]($image, $matches);
-				}
-			}
+            Image::configure(['driver' => 'imagick']);
 
-			$this->save($image);
+            $image = Image::make($real_file_path);
 
-			$response = new Response($image->response(), Response::HTTP_OK, [
-				'content-type'   => $image->mime(),
-				'content-length' => $image->filesize(),
-				'cache-control'  => 'max-age=315360000',
-				'cache-control'  => 'public',
-				'accept-ranges'  => 'bytes',
-			]);
+            foreach ($this->thumb_handlers as $handler_name => $handler_data) {
+                if (preg_match($handler_data[0], $uri_payload, $matches)) {
+                    $handler_data[1]($image, $matches);
+                }
+            }
 
-			return $response->prepare($this->request);
+            $this->save($image);
 
-		}
-		catch (Exception $e)
-		{
-			if ($this->is_debug)
-			{
-				return (new SymfonyDisplayer($this->is_debug))->createResponse($e);
-			}
-	
-			return new Response('404 Not found', Response::HTTP_NOT_FOUND);
-		}
-	}
+            $response = new Response($image->response(), Response::HTTP_OK, [
+                'content-type' => $image->mime(),
+                'content-length' => $image->filesize(),
+                'cache-control' => 'max-age=315360000',
+                'cache-control' => 'public',
+                'accept-ranges' => 'bytes',
+            ]);
 
-	/**
-	 * @param  Image $image
-	 * @return void
-	 */
-	public function save($image)
-	{
-		if ($this->handled_files_root)
-		{
-			$file_store_path = rtrim($this->handled_files_root, '/') . '/' . ltrim($this->getCleanUri(), '/');
+            return $response->prepare($this->request);
 
-			$file_store_dir  = dirname($file_store_path);
+        } catch (Exception $e) {
+            if ($this->is_debug) {
+                return (new SymfonyDisplayer($this->is_debug))->createResponse($e);
+            }
 
-			if ( ! file_exists($file_store_dir))
-			{
-				mkdir($file_store_dir, 0755, true);
-			}
+            return new Response('404 Not found', Response::HTTP_NOT_FOUND);
+        }
+    }
 
-			$image->save($file_store_path);
-		}
-	}
+    /**
+     * @param  Image $image
+     * @return void
+     */
+    public function save($image)
+    {
+        if ($this->handled_files_root) {
+            $file_store_path = rtrim($this->handled_files_root, '/') . '/' . ltrim($this->getCleanUri(), '/');
 
-	/**
-	 * @return array
-	 */
-	public function getRequestChecksum()
-	{
-		if ( ! is_null($this->request_checksum))
-		{
-			return $this->request_checksum;
-		}
+            $file_store_dir = dirname($file_store_path);
 
-		$parts = explode('{checksum}', $this->uri_root, 2);
+            if (!file_exists($file_store_dir)) {
+                mkdir($file_store_dir, 0755, true);
+            }
 
-		if (count($parts) === 2)
-		{
-			if ( ! preg_match('~' . implode('([a-z\d]+)', $parts) . '~', $this->getCleanUri(), $matches))
-			{
-				throw new InvalidArgumentException('Invalid checksum format');
-			}
+            $image->save($file_store_path);
+        }
+    }
 
-			return $this->request_checksum = $matches[1];
-		}
+    /**
+     * @return array
+     */
+    public function getRequestChecksum()
+    {
+        if (!is_null($this->request_checksum)) {
+            return $this->request_checksum;
+        }
 
-		return $this->request_checksum = false;
-	}
+        $parts = explode('{checksum}', $this->uri_root, 2);
 
-	/**
-	 * @return void
-	 */
-	public function getCleanUri()
-	{
-		if ( ! is_null($this->clear_uri))
-		{
-			return $this->clear_uri;
-		}
+        if (count($parts) === 2) {
+            if (!preg_match('~' . implode('([a-z\d]+)', $parts) . '~', $this->getCleanUri(), $matches)) {
+                throw new InvalidArgumentException('Invalid checksum format');
+            }
 
-		list($this->clear_uri) = explode('?', $this->request->getRequestUri());
+            return $this->request_checksum = $matches[1];
+        }
 
-		return $this->clear_uri;
-	}
+        return $this->request_checksum = false;
+    }
 
-	/**
-	 * @return void
-	 */
-	public function getRequestFilePath()
-	{
-		if ( ! is_null($this->request_file_path))
-		{
-			return $this->request_file_path;
-		}
+    /**
+     * @return void
+     */
+    public function getCleanUri()
+    {
+        if (!is_null($this->clear_uri)) {
+            return $this->clear_uri;
+        }
 
-		if ( ! preg_match($this->path_regexp, $this->getCleanUri(), $matches))
-		{
-			throw new InvalidArgumentException('Invalid file path format');
-		}
+        list($this->clear_uri) = explode('?', $this->request->getRequestUri());
 
-		return $this->request_file_path = $matches[0];
-	}
+        return $this->clear_uri;
+    }
 
-	/**
-	 * @param string $path
-	 */
-	public function setHandledFilesRoot($path)
-	{
-		$this->handled_files_root = $path;
-	}
+    /**
+     * @return void
+     */
+    public function getRequestFilePath()
+    {
+        if (!is_null($this->request_file_path)) {
+            return $this->request_file_path;
+        }
 
-	/**
-	 * @param string $path
-	 */
-	public function setOriginalFilesRoot($path)
-	{
-		$this->original_files_root = $path;
-	}
+        if (!preg_match($this->path_regexp, $this->getCleanUri(), $matches)) {
+            throw new InvalidArgumentException('Invalid file path format');
+        }
 
-	/**
-	 * @param string $path
-	 */
-	public function setUriRoot($path)
-	{
-		$this->uri_root = $path;
-	}
+        return $this->request_file_path = $matches[0];
+    }
 
-	/**
-	 * @param  Request $request
-	 * @param  string $uri_root
-	 * @return void
-	 */
-	public function __construct(Request $request, $path_regexp)
-	{
-		$this->request = $request;
+    /**
+     * @param string $path
+     */
+    public function setHandledFilesRoot($path)
+    {
+        $this->handled_files_root = $path;
+    }
 
-		$this->path_regexp = $path_regexp;
-	}
+    /**
+     * @param string $path
+     */
+    public function setOriginalFilesRoot($path)
+    {
+        $this->original_files_root = $path;
+    }
+
+    /**
+     * @param string $path
+     */
+    public function setUriRoot($path)
+    {
+        $this->uri_root = $path;
+    }
+
+    /**
+     * @param  Request $request
+     * @param  string $uri_root
+     * @return void
+     */
+    public function __construct(Request $request, $path_regexp)
+    {
+        $this->request = $request;
+
+        $this->path_regexp = $path_regexp;
+    }
 
 }
