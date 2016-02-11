@@ -2,20 +2,20 @@
 
 return [
 
-	// public path
+    // public path
 
-	'public_path' => public_path(),
+    'public_path' => public_path(),
 
-	// model class
+    // model class
 
-	'model' => 'App\\File',
+    'model' => 'App\\File',
 
-	// prevent physically delete files
+    // prevent physically delete files
 
-	'prevent_deletions' => false,
+    'prevent_deletions' => false,
 
-	// path pattern to store file
+    // path pattern to store file
 
-	'path_pattern' => '/content/files/{contentHash|subpath}/{contentHash}.{ext}',
+    'path_pattern' => '/content/files/{contentHash|subpath}/{contentHash}.{ext}',
 
 ];

@@ -2,13 +2,13 @@
 
 return [
 
-	// this array define list of callable handlers
-	// which using in path interpolation
+    // this array define list of callable handlers
+    // which using in path interpolation
 
-	'ext' => function ($file) {
+    'ext' => function ($file) {
 
-		return $file->getClientOriginalExtension();
+        return $file->getClientOriginalExtension();
 
-	},
+    },
 
 ];

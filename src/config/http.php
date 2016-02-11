@@ -2,12 +2,12 @@
 
 return [
 
-	// domain to access files
+    // domain to access files
 
-	'domain' => 'http://localhost/',
+    'domain' => env('APP_STATIC_URL', 'http://localhost/'),
 
-	// inperpolate path for just uploaded file
+    // inperpolate path for just uploaded file
 
-	'path_pattern' => '/content/files/{contentHash|subpath}/{contentHash}.{ext}',
+    'path_pattern' => '/content/files/{contentHash|subpath}/{contentHash}.{ext}',
 
 ];

@@ -1,18 +1,17 @@
-<?php namespace Ideil\LaravelGenericFile;
+<?php
+
+namespace Ideil\LaravelGenericFile;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Debug\ExceptionHandler as SymfonyDisplayer;
-
 use Intervention\Image\ImageManagerStatic as Image;
-
 use InvalidArgumentException;
 use Exception;
 
 class GenericFileMiner
 {
-
     use Traits\TokenTrait;
 
     /**
@@ -61,12 +60,12 @@ class GenericFileMiner
     protected $path_regexp;
 
     /**
-     * @var boolean
+     * @var bool
      */
     protected $is_debug = false;
 
     /**
-     * @param boolean $is_active
+     * @param bool $is_active
      */
     public function setDevModeActivity($is_active)
     {
@@ -75,7 +74,8 @@ class GenericFileMiner
 
     /**
      * @param string $url
-     * @return  Symfony\Component\HttpFoundation\RedirectResponse
+     *
+     * @return Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function getRedirectTo($url)
     {
@@ -83,8 +83,9 @@ class GenericFileMiner
     }
 
     /**
-     * @param  string   $pattern
-     * @param  Callable $handler
+     * @param string   $pattern
+     * @param callable $handler
+     *
      * @return mixed
      */
     public function uriMatch($pattern, callable $handler)
@@ -95,8 +96,9 @@ class GenericFileMiner
     }
 
     /**
-     * @param  string   $pattern
-     * @param  Callable $handler
+     * @param string   $pattern
+     * @param callable $handler
+     *
      * @return mixed
      */
     public function uriNotMatch($pattern, callable $handler)
@@ -109,7 +111,7 @@ class GenericFileMiner
     /**
      * @param string   $name
      * @param string   $regexp
-     * @param Callable $handler
+     * @param callable $handler
      */
     public function addThumbHandler($name, $regexp, callable $handler)
     {
@@ -117,12 +119,10 @@ class GenericFileMiner
     }
 
     /**
-     * @return void
      */
     public function handle()
     {
-        try
-        {
+        try {
             if ($this->getRequestChecksum()) {
                 $uri_root = rtrim(str_replace('{checksum}',
                     $this->getRequestChecksum(), $this->uri_root), '/');
@@ -140,11 +140,13 @@ class GenericFileMiner
                 }
             }
 
-            if (!file_exists($real_file_path = rtrim($this->original_files_root, '/') . '/' . ltrim($this->getRequestFilePath(), '/'))) {
-                throw new InvalidArgumentException('File not exists ' . $real_file_path);
+            if (!file_exists($real_file_path = rtrim($this->original_files_root, '/').'/'.ltrim($this->getRequestFilePath(), '/'))) {
+                throw new InvalidArgumentException('File not exists '.$real_file_path);
             }
 
-            Image::configure(['driver' => 'imagick']);
+            Image::configure(
+                config('generic-file.miner.imageHandling')
+            );
 
             $image = Image::make($real_file_path);
 
@@ -165,7 +167,6 @@ class GenericFileMiner
             ]);
 
             return $response->prepare($this->request);
-
         } catch (Exception $e) {
             if ($this->is_debug) {
                 return (new SymfonyDisplayer($this->is_debug))->createResponse($e);
@@ -176,13 +177,12 @@ class GenericFileMiner
     }
 
     /**
-     * @param  Image $image
-     * @return void
+     * @param Image $image
      */
     public function save($image)
     {
         if ($this->handled_files_root) {
-            $file_store_path = rtrim($this->handled_files_root, '/') . '/' . ltrim($this->getCleanUri(), '/');
+            $file_store_path = rtrim($this->handled_files_root, '/').'/'.ltrim($this->getCleanUri(), '/');
 
             $file_store_dir = dirname($file_store_path);
 
@@ -206,7 +206,7 @@ class GenericFileMiner
         $parts = explode('{checksum}', $this->uri_root, 2);
 
         if (count($parts) === 2) {
-            if (!preg_match('~' . implode('([a-z\d]+)', $parts) . '~', $this->getCleanUri(), $matches)) {
+            if (!preg_match('~'.implode('([a-z\d]+)', $parts).'~', $this->getCleanUri(), $matches)) {
                 throw new InvalidArgumentException('Invalid checksum format');
             }
 
@@ -217,7 +217,6 @@ class GenericFileMiner
     }
 
     /**
-     * @return void
      */
     public function getCleanUri()
     {
@@ -231,7 +230,6 @@ class GenericFileMiner
     }
 
     /**
-     * @return void
      */
     public function getRequestFilePath()
     {
@@ -271,9 +269,8 @@ class GenericFileMiner
     }
 
     /**
-     * @param  Request $request
-     * @param  string $uri_root
-     * @return void
+     * @param Request $request
+     * @param string  $uri_root
      */
     public function __construct(Request $request, $path_regexp)
     {
@@ -281,5 +278,4 @@ class GenericFileMiner
 
         $this->path_regexp = $path_regexp;
     }
-
 }
