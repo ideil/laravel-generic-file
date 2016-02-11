@@ -60,6 +60,11 @@ class GenericFileMiner
     protected $path_regexp;
 
     /**
+     * @var array
+     */
+    protected $img_handling_settings = ['driver' => 'imagick'];
+
+    /**
      * @var bool
      */
     protected $is_debug = false;
@@ -144,9 +149,7 @@ class GenericFileMiner
                 throw new InvalidArgumentException('File not exists '.$real_file_path);
             }
 
-            Image::configure(
-                config('generic-file.miner.imageHandling')
-            );
+            Image::configure($this->img_handling_settings);
 
             $image = Image::make($real_file_path);
 
@@ -272,10 +275,15 @@ class GenericFileMiner
      * @param Request $request
      * @param string  $uri_root
      */
-    public function __construct(Request $request, $path_regexp)
+    public function __construct(Request $request, $path_regexp, $img_handling_settings = [])
     {
         $this->request = $request;
 
         $this->path_regexp = $path_regexp;
+
+        $this->img_handling_settings = array_merge(
+            $this->img_handling_settings,
+            $img_handling_settings
+        );
     }
 }

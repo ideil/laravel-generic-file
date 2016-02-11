@@ -24,7 +24,6 @@ class LaravelGenericFileServiceProvider extends BaseServiceProvider
             'handlers-filters',
             'http',
             'store',
-            'miner',
         ];
 
         $configDir = __DIR__.'/config';
