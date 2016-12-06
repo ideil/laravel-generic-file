@@ -69,6 +69,25 @@ class GenericFileMiner
      */
     protected $is_debug = false;
 
+    protected $cleanUriResolver;
+
+    /**
+     * @param Request $request
+     * @param string $path_regexp
+     * @param array $img_handling_settings
+     */
+    public function __construct(Request $request, $path_regexp, array $img_handling_settings = [])
+    {
+        $this->request = $request;
+
+        $this->path_regexp = $path_regexp;
+
+        $this->img_handling_settings = array_merge(
+            $this->img_handling_settings,
+            $img_handling_settings
+        );
+    }
+
     /**
      * @param bool $is_active
      */
@@ -79,8 +98,8 @@ class GenericFileMiner
 
     /**
      * @param string $url
-     *
-     * @return Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
+     * @throws InvalidArgumentException
      */
     public function getRedirectTo($url)
     {
@@ -88,7 +107,7 @@ class GenericFileMiner
     }
 
     /**
-     * @param string   $pattern
+     * @param string $pattern
      * @param callable $handler
      *
      * @return mixed
@@ -101,7 +120,7 @@ class GenericFileMiner
     }
 
     /**
-     * @param string   $pattern
+     * @param string $pattern
      * @param callable $handler
      *
      * @return mixed
@@ -114,8 +133,8 @@ class GenericFileMiner
     }
 
     /**
-     * @param string   $name
-     * @param string   $regexp
+     * @param string $name
+     * @param string $regexp
      * @param callable $handler
      */
     public function addThumbHandler($name, $regexp, callable $handler)
@@ -124,13 +143,20 @@ class GenericFileMiner
     }
 
     /**
+     * @throws InvalidArgumentException
      */
     public function handle()
     {
         try {
             if ($this->getRequestChecksum()) {
-                $uri_root = rtrim(str_replace('{checksum}',
-                    $this->getRequestChecksum(), $this->uri_root), '/');
+                $uri_root = rtrim(
+                    str_replace(
+                        '{checksum}',
+                        $this->getRequestChecksum(),
+                        $this->uri_root
+                    ),
+                    '/'
+                );
 
                 // with trailling left slash
 
@@ -199,10 +225,11 @@ class GenericFileMiner
 
     /**
      * @return array
+     * @throws InvalidArgumentException
      */
     public function getRequestChecksum()
     {
-        if (!is_null($this->request_checksum)) {
+        if ($this->request_checksum !== null) {
             return $this->request_checksum;
         }
 
@@ -223,20 +250,37 @@ class GenericFileMiner
      */
     public function getCleanUri()
     {
-        if (!is_null($this->clear_uri)) {
+        if ($this->clear_uri !== null) {
             return $this->clear_uri;
         }
 
         list($this->clear_uri) = explode('?', $this->request->getRequestUri());
 
+        $this->clear_uri = $this->cleanUriResolve($this->clear_uri);
+
         return $this->clear_uri;
     }
 
+    public function cleanUriResolve($uri)
+    {
+        if ($this->cleanUriResolver) {
+            return call_user_func($this->cleanUriResolver, $uri);
+        }
+
+        return $uri;
+    }
+
+    public function setCleanUriResolver($callback)
+    {
+        $this->cleanUriResolver = $callback;
+    }
+
     /**
+     * @throws InvalidArgumentException
      */
     public function getRequestFilePath()
     {
-        if (!is_null($this->request_file_path)) {
+        if (null !== $this->request_file_path) {
             return $this->request_file_path;
         }
 
@@ -269,21 +313,5 @@ class GenericFileMiner
     public function setUriRoot($path)
     {
         $this->uri_root = $path;
-    }
-
-    /**
-     * @param Request $request
-     * @param string  $uri_root
-     */
-    public function __construct(Request $request, $path_regexp, $img_handling_settings = [])
-    {
-        $this->request = $request;
-
-        $this->path_regexp = $path_regexp;
-
-        $this->img_handling_settings = array_merge(
-            $this->img_handling_settings,
-            $img_handling_settings
-        );
     }
 }
