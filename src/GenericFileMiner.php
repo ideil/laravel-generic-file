@@ -186,7 +186,7 @@ class GenericFileMiner
 
             foreach ($this->thumb_handlers as $handler_name => $handler_data) {
                 if (preg_match($handler_data[0], $uri_payload, $matches)) {
-                    $handler_data[1]($image, $matches);
+                    $image = $handler_data[1]($image, $matches);
                 }
             }
 
