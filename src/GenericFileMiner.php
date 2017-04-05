@@ -6,7 +6,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Debug\ExceptionHandler as SymfonyDisplayer;
-use Intervention\Image\ImageManagerStatic as Image;
+use Imagine\Gd\Imagine as ImageGd;
+use Imagine\Imagick\Imagine as ImageImagick;
 use InvalidArgumentException;
 use Exception;
 
@@ -175,9 +176,13 @@ class GenericFileMiner
                 throw new InvalidArgumentException('File not exists '.$real_file_path);
             }
 
-            Image::configure($this->img_handling_settings);
+            if ($this->img_handling_settings['driver'] == 'gd') {
+                $imagine = new ImageGd;
+            } else {
+                $imagine = new ImageImagick;
+            }
 
-            $image = Image::make($real_file_path);
+            $image = $imagine->open($real_file_path);
 
             foreach ($this->thumb_handlers as $handler_name => $handler_data) {
                 if (preg_match($handler_data[0], $uri_payload, $matches)) {
