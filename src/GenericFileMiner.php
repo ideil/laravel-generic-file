@@ -190,14 +190,16 @@ class GenericFileMiner
                 }
             }
 
-            $this->save($image, $saveOptions);
-
-            $response = new Response($image->response(), Response::HTTP_OK, [
-                'content-type' => $image->mime(),
-                'content-length' => $image->filesize(),
+            $storedPath = $this->save($image, $saveOptions);
+            $imgInfo = getimagesize($storedPath);
+            
+            $response = new Response('', Response::HTTP_OK, [
+                'content-type' => $imgInfo['mime'],
+                'content-length' => filesize($storedPath),
                 'cache-control' => 'max-age=315360000',
                 'cache-control' => 'public',
                 'accept-ranges' => 'bytes',
+                'X-Accel-Redirect' => $this->getCleanUri(),
             ]);
 
             return $response->prepare($this->request);
@@ -225,6 +227,7 @@ class GenericFileMiner
             }
 
             $image->save($file_store_path, $saveOptions);
+            return $file_store_path;
         }
     }
 
