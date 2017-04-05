@@ -145,7 +145,7 @@ class GenericFileMiner
     /**
      * @throws InvalidArgumentException
      */
-    public function handle()
+    public function handle($saveOptions = [])
     {
         try {
             if ($this->getRequestChecksum()) {
@@ -185,7 +185,7 @@ class GenericFileMiner
                 }
             }
 
-            $this->save($image);
+            $this->save($image, $saveOptions);
 
             $response = new Response($image->response(), Response::HTTP_OK, [
                 'content-type' => $image->mime(),
