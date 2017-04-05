@@ -213,7 +213,7 @@ class GenericFileMiner
     /**
      * @param Image $image
      */
-    public function save($image)
+    public function save($image, $saveOptions = [])
     {
         if ($this->handled_files_root) {
             $file_store_path = rtrim($this->handled_files_root, '/').'/'.ltrim($this->getCleanUri(), '/');
@@ -224,7 +224,7 @@ class GenericFileMiner
                 mkdir($file_store_dir, 0755, true);
             }
 
-            $image->save($file_store_path);
+            $image->save($file_store_path, $saveOptions);
         }
     }
 
